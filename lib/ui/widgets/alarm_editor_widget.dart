@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rapido_reminder/domain/states/alarm_editor.dart';
+import 'package:rapido_reminder/utils/input_widget.dart';
 
 const channelKey = 'alarm_channel';
 
@@ -18,15 +19,19 @@ class AlarmEditorWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: TextEditingController(text: state.title.value),
-                  decoration: const InputDecoration(labelText: 'Title'),
-                  onSubmitted: state.title,
-                ),
-              ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: InputWidget(
+                      text: state.title.value,
+                      lable: 'Title',
+                      validator: _titleValidator,
+                      submit: (val) {
+                        if (val.isNotEmpty) {
+                          state.title.value = val;
+                        }
+                      })),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   ElevatedButton(
                       onPressed: () => _pickupDate(state),
@@ -34,21 +39,22 @@ class AlarmEditorWidget extends StatelessWidget {
                   ElevatedButton(
                       onPressed: () => _pickupTime(state),
                       child: Text(state.timeStr.value)),
-                  SizedBox(
-                      width: 75,
-                      child: TextField(
-                        controller: TextEditingController(
-                            text: state.durationStr.value),
-                        decoration:
-                            const InputDecoration(labelText: 'In minutes'),
-                        textAlign: TextAlign.center,
-                        onSubmitted: (val) {
-                          final duration = int.tryParse(val);
-                          if (duration != null) {
-                            state.setDuration(duration);
-                          }
-                        },
-                      )),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                        width: 100,
+                        child: InputWidget(
+                            text: state.durationStr.value,
+                            lable: 'In minutes',
+                            validator: _minutesValidator,
+                            inputType: TextInputType.number,
+                            submit: (val) {
+                              final duration = int.tryParse(val);
+                              if (duration != null) {
+                                state.setDuration(duration);
+                              }
+                            })),
+                  ),
                 ],
               ),
             ],
@@ -73,5 +79,22 @@ class AlarmEditorWidget extends StatelessWidget {
             initialDate: initDate,
             firstDate: initDate,
             lastDate: DateTime(initDate.year + 1))));
+  }
+
+  String? _minutesValidator(String? val) {
+    if (val != null) {
+      final duration = int.tryParse(val);
+      if (duration == null) {
+        return 'Should be int';
+      }
+    }
+    return null;
+  }
+
+  String? _titleValidator(String? val) {
+    if (val == null || val.isEmpty) {
+      return "Can't be empty";
+    }
+    return null;
   }
 }

@@ -6,7 +6,7 @@ import 'package:rapido_reminder/domain/states/alarm_manager.dart';
 import 'package:rapido_reminder/utils/utils.dart';
 
 class AlarmEditor extends GetxController {
-  final title = 'alarm'.obs;
+  final title = ' '.obs;
   DateTime _date = DateTime.now();
   final dateStr = DateFormat('y-MM-dd').format(DateTime.now()).obs;
   final timeStr = DateFormat('HH:mm').format(DateTime.now()).obs;
@@ -18,7 +18,7 @@ class AlarmEditor extends GetxController {
     dateStr.value = DateFormat('y-MM-dd').format(val);
     timeStr.value = DateFormat('HH:mm').format(val);
     final range = DateTimeRange(start: DateTime.now(), end: alarmDate);
-    durationStr.value = range.duration.inMinutes.toString();
+    durationStr.value = (range.duration.inMinutes + 1).toString();
   }
 
   DateTime get alarmDate => _date;
@@ -28,7 +28,7 @@ class AlarmEditor extends GetxController {
     NotificationCalendar? schedule,
   }) {
     if (content != null && schedule != null) {
-      title.value = content.title ?? 'alarm';
+      title.value = content.title ?? ' ';
       alarmDate = scheduleToDate(schedule);
     }
     isOpen.value = true;
