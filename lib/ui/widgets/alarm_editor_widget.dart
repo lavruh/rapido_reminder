@@ -39,7 +39,8 @@ class AlarmEditorWidget extends StatelessWidget {
                       child: TextField(
                         controller: TextEditingController(
                             text: state.durationStr.value),
-                        decoration: const InputDecoration(labelText: 'In minutes'),
+                        decoration:
+                            const InputDecoration(labelText: 'In minutes'),
                         textAlign: TextAlign.center,
                         onSubmitted: (val) {
                           final duration = int.tryParse(val);
@@ -48,9 +49,6 @@ class AlarmEditorWidget extends StatelessWidget {
                           }
                         },
                       )),
-                  IconButton(
-                      onPressed: () => state.submit(),
-                      icon: const Icon(Icons.save))
                 ],
               ),
             ],
@@ -61,7 +59,7 @@ class AlarmEditorWidget extends StatelessWidget {
   }
 
   void _pickupTime(AlarmEditor state, {DateTime? date}) async {
-    final initTime = TimeOfDay.fromDateTime(state.alarmDate ?? DateTime.now());
+    final initTime = TimeOfDay.fromDateTime(state.alarmDate);
     state.pickupDateTime(
         date: date,
         rawTimeVal: await Get.dialog<TimeOfDay>(
@@ -69,7 +67,7 @@ class AlarmEditorWidget extends StatelessWidget {
   }
 
   _pickupDate(AlarmEditor state) async {
-    final initDate = state.alarmDate ?? DateTime.now();
+    final initDate = state.alarmDate;
     _pickupTime(state,
         date: await Get.dialog<DateTime>(DatePickerDialog(
             initialDate: initDate,

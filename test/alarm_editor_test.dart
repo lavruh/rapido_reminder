@@ -26,10 +26,11 @@ main() {
   test('select time ahead', () async {
     final now = DateTime.now();
     final time = TimeOfDay(hour: now.hour + 1, minute: now.minute - 3);
-    final duration = DateTimeRange(
-        start: now, end: now.copyWith(hour: time.hour, minute: time.minute));
 
     sut.pickupDateTime(rawTimeVal: time);
+
+    final duration = DateTimeRange(
+        start: now, end: now.copyWith(hour: time.hour, minute: time.minute));
 
     expect(sut.alarmDate.year, now.year);
     expect(sut.alarmDate.month, now.month);

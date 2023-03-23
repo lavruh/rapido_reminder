@@ -1,10 +1,14 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rapido_reminder/domain/states/alarm_editor.dart';
-import 'package:rapido_reminder/ui/widgets/alarm_editor_widget.dart';
+import 'package:rapido_reminder/domain/states/alarm_manager.dart';
+import 'package:rapido_reminder/ui/screens/alarms_screen.dart';
 
 const channelKey = 'alarm_channel';
+
+Future<void> actionReceived(ReceivedAction a) async {}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,16 +20,17 @@ void main() {
       defaultColor: Colors.grey,
       channelDescription: 'alarm_channel',
       criticalAlerts: true,
-      channelShowBadge: true,
       enableLights: true,
-      ledColor: Colors.red,
-      ledOnMs: 500,
-      ledOffMs: 1000,
+      ledColor: Colors.orange,
+      ledOnMs: 100,
+      ledOffMs: 100,
       enableVibration: true,
       importance: NotificationImportance.High,
     )
   ]);
   Get.put<AlarmEditor>(AlarmEditor());
+  Get.put<AlarmsManager>(AlarmsManager());
+  Get.put<AudioPlayer>(AudioPlayer());
 
   runApp(const MyApp());
 }
@@ -35,60 +40,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AwesomeNotifications().setListeners(
+        onActionReceivedMethod: actionReceived,
+        onNotificationDisplayedMethod: (a) async {
+          Get.find<AudioPlayer>()
+              .play(AssetSource('sounds/digital-alarm-buzzer.wav'));
+        },
+        onDismissActionReceivedMethod: (a) async {
+          Get.find<AudioPlayer>().stop();
+        });
     return GetMaterialApp(
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            AlarmEditorWidget(),
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      home: const AlarmsScreen(),
     );
   }
 }

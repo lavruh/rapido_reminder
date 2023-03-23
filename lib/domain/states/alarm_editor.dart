@@ -2,6 +2,8 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:rapido_reminder/domain/states/alarm_manager.dart';
+import 'package:rapido_reminder/utils/utils.dart';
 
 class AlarmEditor extends GetxController {
   final title = 'alarm'.obs;
@@ -9,14 +11,28 @@ class AlarmEditor extends GetxController {
   final dateStr = DateFormat('y-MM-dd').format(DateTime.now()).obs;
   final timeStr = DateFormat('HH:mm').format(DateTime.now()).obs;
   final durationStr = '0'.obs;
+  final isOpen = false.obs;
 
   set alarmDate(DateTime val) {
     _date = val;
     dateStr.value = DateFormat('y-MM-dd').format(val);
     timeStr.value = DateFormat('HH:mm').format(val);
+    final range = DateTimeRange(start: DateTime.now(), end: alarmDate);
+    durationStr.value = range.duration.inMinutes.toString();
   }
 
   DateTime get alarmDate => _date;
+
+  openEditor({
+    NotificationContent? content,
+    NotificationCalendar? schedule,
+  }) {
+    if (content != null && schedule != null) {
+      title.value = content.title ?? 'alarm';
+      alarmDate = scheduleToDate(schedule);
+    }
+    isOpen.value = true;
+  }
 
   pickupDateTime({DateTime? date, TimeOfDay? rawTimeVal}) async {
     if (rawTimeVal != null) {
@@ -29,12 +45,9 @@ class AlarmEditor extends GetxController {
               now.millisecondsSinceEpoch
           ? rawDateVal
           : tomorrow.copyWith(hour: rawTimeVal.hour, minute: rawTimeVal.minute);
-
       alarmDate =
           date?.copyWith(hour: rawTimeVal.hour, minute: rawTimeVal.minute) ??
               timeVal;
-      final range = DateTimeRange(start: now, end: alarmDate);
-      durationStr.value = range.duration.inMinutes.toString();
     }
   }
 
@@ -44,17 +57,17 @@ class AlarmEditor extends GetxController {
     final newDate = DateTime.fromMillisecondsSinceEpoch(
         now.millisecondsSinceEpoch + d.inMilliseconds);
     alarmDate = newDate;
-    durationStr.value = duration.toString();
   }
 
   submit() async {
     NotificationContent content = NotificationContent(
-      id: 0,
+      id: DateTime.now().second + DateTime.now().millisecond,
       title: title.value,
       channelKey: 'alarm_channel',
-      criticalAlert: true,
-      category: NotificationCategory.Alarm,
-      actionType: ActionType.KeepOnTop,
+      showWhen: true,
+      wakeUpScreen: true,
+      category: NotificationCategory.Reminder,
+      actionType: ActionType.DismissAction,
     );
 
     NotificationCalendar schedule = NotificationCalendar(
@@ -63,13 +76,10 @@ class AlarmEditor extends GetxController {
       day: _date.day,
       hour: _date.hour,
       minute: _date.minute,
+      allowWhileIdle: true,
+      preciseAlarm: true,
     );
-    final success = await  AwesomeNotifications().createNotification(
-        content: content,
-        schedule: schedule,
-      );
-    if(!success){
-      Get.snackbar('Error :', 'Can not create notification');
-    }
+    Get.find<AlarmsManager>().createAlarm(content: content, schedule: schedule);
+    isOpen.value = false;
   }
 }
