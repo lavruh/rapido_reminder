@@ -14,6 +14,7 @@ class AlarmsManager extends GetxController {
   createAlarm({
     required Alarm alarm,
   }) async {
+    await AwesomeNotifications().cancel(alarm.id);
 
     await AwesomeNotifications().createNotification(
       content: alarm.toNotificationContent(),

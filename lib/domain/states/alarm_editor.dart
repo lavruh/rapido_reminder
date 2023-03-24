@@ -1,4 +1,3 @@
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -26,13 +25,11 @@ class AlarmEditor extends GetxController {
 
   String get durationStr => duration.value.inMinutes.toString();
 
-  openEditor({
-    NotificationContent? content,
-    NotificationCalendar? schedule,
+  openEditor({Alarm? alarm
   }) {
-    if (content != null && schedule != null) {
-      title.value = content.title ?? ' ';
-      alarmDate = scheduleToDate(schedule);
+    if (alarm != null) {
+      title.value = alarm.title;
+      setDuration(alarm.duration.inMinutes);
     }
     isOpen.value = true;
   }

@@ -30,14 +30,25 @@ class AlarmsScreen extends StatelessWidget {
                   Flexible(
                     child: ListView(
                       children: state.alarms
-                          .map((e) => AlarmWidget(item: e))
+                          .map((e) => AlarmWidget(
+                                item: e,
+                                onTap: () {
+                                  Get.find<AlarmEditor>().openEditor(alarm: e);
+                                },
+                              ))
                           .toList(),
                     ),
                   ),
                   Flexible(
                     child: ListView(
                       children: state.inactiveAlarms
-                          .map((e) => AlarmWidget(item: e, inActive: true,))
+                          .map((e) => AlarmWidget(
+                                item: e,
+                                inActive: true,
+                                onTap: () {
+                                  Get.find<AlarmEditor>().openEditor(alarm: e);
+                                },
+                              ))
                           .toList(),
                     ),
                   )
