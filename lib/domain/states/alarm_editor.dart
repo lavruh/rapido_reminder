@@ -2,6 +2,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:rapido_reminder/domain/entities/alarm.dart';
 import 'package:rapido_reminder/domain/states/alarm_manager.dart';
 import 'package:rapido_reminder/utils/utils.dart';
 
@@ -10,7 +11,7 @@ class AlarmEditor extends GetxController {
   DateTime _date = DateTime.now();
   final dateStr = DateFormat('y-MM-dd').format(DateTime.now()).obs;
   final timeStr = DateFormat('HH:mm').format(DateTime.now()).obs;
-  final durationStr = '0'.obs;
+  final duration = const Duration(minutes: 0).obs;
   final isOpen = false.obs;
 
   set alarmDate(DateTime val) {
@@ -18,10 +19,12 @@ class AlarmEditor extends GetxController {
     dateStr.value = DateFormat('y-MM-dd').format(val);
     timeStr.value = DateFormat('HH:mm').format(val);
     final range = DateTimeRange(start: DateTime.now(), end: alarmDate);
-    durationStr.value = (range.duration.inMinutes + 1).toString();
+    duration.value = roundToMinutes(range.duration);
   }
 
   DateTime get alarmDate => _date;
+
+  String get durationStr => duration.value.inMinutes.toString();
 
   openEditor({
     NotificationContent? content,
@@ -60,26 +63,9 @@ class AlarmEditor extends GetxController {
   }
 
   submit() async {
-    NotificationContent content = NotificationContent(
-      id: DateTime.now().second + DateTime.now().millisecond,
-      title: title.value,
-      channelKey: 'alarm_channel',
-      showWhen: true,
-      wakeUpScreen: true,
-      category: NotificationCategory.Reminder,
-      actionType: ActionType.DismissAction,
-    );
-
-    NotificationCalendar schedule = NotificationCalendar(
-      year: _date.year,
-      month: _date.month,
-      day: _date.day,
-      hour: _date.hour,
-      minute: _date.minute,
-      allowWhileIdle: true,
-      preciseAlarm: true,
-    );
-    Get.find<AlarmsManager>().createAlarm(content: content, schedule: schedule);
+    final alarm =
+        Alarm(title: title.value, date: _date, duration: duration.value);
+    Get.find<AlarmsManager>().createAlarm(alarm: alarm);
     isOpen.value = false;
   }
 }

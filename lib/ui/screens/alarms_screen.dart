@@ -23,20 +23,27 @@ class AlarmsScreen extends StatelessWidget {
           onRefresh: () async {
             Get.find<AlarmsManager>().getAlarms();
           },
-          child: Column(
-            children: [
-              GetX<AlarmsManager>(
-                builder: (state) {
-                  return Flexible(
+          child: GetX<AlarmsManager>(
+            builder: (state) {
+              return Column(
+                children: [
+                  Flexible(
                     child: ListView(
                       children: state.alarms
                           .map((e) => AlarmWidget(item: e))
                           .toList(),
                     ),
-                  );
-                },
-              ),
-            ],
+                  ),
+                  Flexible(
+                    child: ListView(
+                      children: state.inactiveAlarms
+                          .map((e) => AlarmWidget(item: e, inActive: true,))
+                          .toList(),
+                    ),
+                  )
+                ],
+              );
+            },
           ),
         ),
         bottomSheet: GetX<AlarmEditor>(builder: (s) {

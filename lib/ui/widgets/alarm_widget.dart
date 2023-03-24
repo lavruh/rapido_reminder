@@ -1,12 +1,12 @@
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:rapido_reminder/utils/utils.dart';
+import 'package:rapido_reminder/domain/entities/alarm.dart';
 
 class AlarmWidget extends StatelessWidget {
-  const AlarmWidget({Key? key, required this.item}) : super(key: key);
-  final NotificationModel item;
+  const AlarmWidget({Key? key, required this.item, this.inActive = false})
+      : super(key: key);
+  final Alarm item;
+  final bool inActive;
 
   @override
   Widget build(BuildContext context) {
@@ -15,21 +15,15 @@ class AlarmWidget extends StatelessWidget {
       child: Card(
           elevation: 5,
           child: ListTile(
-            leading: const Icon(Icons.alarm),
-            title: Text(
-                "${item.content?.title} @ ${_getScheduleDateTime(item.schedule)}"),
+            tileColor: inActive ? Colors.grey : null,
+            leading: inActive
+                ? const Icon(Icons.alarm_off)
+                : const Icon(Icons.alarm),
+            title: Text( inActive ?
+              "${item.title} = ${item.duration}" :
+              "${item.title} @ ${DateFormat('y-MM-dd HH:mm').format(item.date)}",
+            ),
           )),
     );
-  }
-
-  String _getScheduleDateTime(NotificationSchedule? sch) {
-    if (sch != null) {
-      try {
-        return DateFormat('y-MM-dd HH:mm').format(scheduleToDate(sch));
-      } on Exception catch(e){
-        Get.snackbar('Error', 'Wrong notification date [$e]');
-      }
-    }
-    return "";
   }
 }

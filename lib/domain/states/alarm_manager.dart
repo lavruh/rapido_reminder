@@ -1,24 +1,30 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:get/get.dart';
+import 'package:rapido_reminder/domain/entities/alarm.dart';
 
 class AlarmsManager extends GetxController {
-  final alarms = <NotificationModel>[].obs;
-  AlarmsManager() {
-    getAlarms();
-  }
+  final alarms = <Alarm>[].obs;
+  final inactiveAlarms = <Alarm>[].obs;
 
   getAlarms() async {
-    alarms.value = await AwesomeNotifications().listScheduledNotifications();
+    final list = await AwesomeNotifications().listScheduledNotifications();
+    alarms.value = list.map((e) => Alarm.fromNotificationModel(e)).toList();
   }
 
   createAlarm({
-    required NotificationContent content,
-    required NotificationSchedule schedule,
+    required Alarm alarm,
   }) async {
+
     await AwesomeNotifications().createNotification(
-      content: content,
-      schedule: schedule,
+      content: alarm.toNotificationContent(),
+      schedule: alarm.toNotificationCalendar(),
     );
-    getAlarms();
+    alarms.add(alarm);
+  }
+
+  moveAlarmToInactive(int id){
+    final index = alarms.indexWhere((e) => e.id == id);
+    final alarm = alarms.removeAt(index);
+    inactiveAlarms.add(alarm);
   }
 }

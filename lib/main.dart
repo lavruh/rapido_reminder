@@ -48,6 +48,10 @@ class MyApp extends StatelessWidget {
         },
         onDismissActionReceivedMethod: (a) async {
           Get.find<AudioPlayer>().stop();
+          final id = a.id;
+          if(id != null) {
+            Get.find<AlarmsManager>().moveAlarmToInactive(id);
+          }
         });
     return GetMaterialApp(
       theme: ThemeData(

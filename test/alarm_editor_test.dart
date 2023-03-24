@@ -42,7 +42,7 @@ main() {
         sut.timeStr.value,
         DateFormat('HH:mm')
             .format(now.copyWith(hour: time.hour, minute: time.minute)));
-    expect(sut.durationStr.value, duration.duration.inMinutes.toString());
+    expect(sut.durationStr, duration.duration.inMinutes.toString());
   });
 
   test('select time at tomorrow', () async {
@@ -67,7 +67,8 @@ main() {
     final time = TimeOfDay(hour: now.hour - 1, minute: now.minute);
     final tommorow =
         now.copyWith(day: now.day + 5, hour: time.hour, minute: time.minute);
-    final duration = DateTimeRange(start: now, end: tommorow).duration.inMinutes;
+    final duration =
+        DateTimeRange(start: now, end: tommorow).duration.inMinutes;
 
     sut.setDuration(duration);
 
