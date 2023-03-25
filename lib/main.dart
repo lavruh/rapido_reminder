@@ -2,6 +2,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rapido_reminder/data/i_store_serv.dart';
+import 'package:rapido_reminder/data/shared_pref_store_serv.dart';
 import 'package:rapido_reminder/domain/states/alarm_editor.dart';
 import 'package:rapido_reminder/domain/states/alarm_manager.dart';
 import 'package:rapido_reminder/ui/screens/alarms_screen.dart';
@@ -28,6 +30,7 @@ void main() {
       importance: NotificationImportance.High,
     )
   ]);
+  Get.put<IStoreServ>(SharedPrefStoreServ());
   Get.put<AlarmEditor>(AlarmEditor());
   Get.put<AlarmsManager>(AlarmsManager());
   Get.put<AudioPlayer>(AudioPlayer());
@@ -49,14 +52,12 @@ class MyApp extends StatelessWidget {
         onDismissActionReceivedMethod: (a) async {
           Get.find<AudioPlayer>().stop();
           final id = a.id;
-          if(id != null) {
+          if (id != null) {
             Get.find<AlarmsManager>().moveAlarmToInactive(id);
           }
         });
     return GetMaterialApp(
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const AlarmsScreen(),
     );
   }

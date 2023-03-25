@@ -7,6 +7,7 @@ import 'package:rapido_reminder/utils/utils.dart';
 
 class AlarmEditor extends GetxController {
   final title = ' '.obs;
+  int? _id;
   DateTime _date = DateTime.now();
   final dateStr = DateFormat('y-MM-dd').format(DateTime.now()).obs;
   final timeStr = DateFormat('HH:mm').format(DateTime.now()).obs;
@@ -25,11 +26,15 @@ class AlarmEditor extends GetxController {
 
   String get durationStr => duration.value.inMinutes.toString();
 
-  openEditor({Alarm? alarm
-  }) {
+  openEditor({Alarm? alarm}) {
     if (alarm != null) {
+      _id = alarm.id;
       title.value = alarm.title;
       setDuration(alarm.duration.inMinutes);
+    } else{
+      _id = null;
+      title.value = '';
+      setDuration(1);
     }
     isOpen.value = true;
   }
@@ -61,7 +66,7 @@ class AlarmEditor extends GetxController {
 
   submit() async {
     final alarm =
-        Alarm(title: title.value, date: _date, duration: duration.value);
+        Alarm(id: _id, title: title.value, date: _date, duration: duration.value);
     Get.find<AlarmsManager>().createAlarm(alarm: alarm);
     isOpen.value = false;
   }

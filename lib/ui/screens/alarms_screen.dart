@@ -35,6 +35,8 @@ class AlarmsScreen extends StatelessWidget {
                                 onTap: () {
                                   Get.find<AlarmEditor>().openEditor(alarm: e);
                                 },
+                                slideIcon: Icons.cancel,
+                                onSlideTap: () => state.cancelAlarm(e),
                               ))
                           .toList(),
                     ),
@@ -48,6 +50,8 @@ class AlarmsScreen extends StatelessWidget {
                                 onTap: () {
                                   Get.find<AlarmEditor>().openEditor(alarm: e);
                                 },
+                                slideIcon: Icons.delete,
+                                onSlideTap: () => state.deleteInactiveAlarm(e),
                               ))
                           .toList(),
                     ),
