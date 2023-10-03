@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class InputWidget extends StatelessWidget {
+class InputWidget extends StatefulWidget {
   const InputWidget(
       {Key? key,
       required this.text,
@@ -16,18 +16,51 @@ class InputWidget extends StatelessWidget {
   final TextInputType? inputType;
 
   @override
+  State<InputWidget> createState() => _InputWidgetState();
+}
+
+class _InputWidgetState extends State<InputWidget> {
+  final controller = TextEditingController();
+  bool isChanged = false;
+
+  @override
+  void initState() {
+    controller.text = widget.text;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: TextEditingController(text: text),
+      controller: controller,
       decoration: InputDecoration(
-          labelText: lable,
-          border: const OutlineInputBorder()),
-      keyboardType: inputType,
+        labelText: widget.lable,
+        border: const OutlineInputBorder(),
+        suffix: isChanged
+            ? InkWell(
+                onTapUp: (_) {
+                  widget.submit(controller.text);
+                  isChanged = false;
+                  setState(() {});
+                },
+                child: const Icon(Icons.check),
+              )
+            : null,
+      ),
+      keyboardType: widget.inputType,
       textAlign: TextAlign.center,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      validator: validator,
-      onFieldSubmitted: submit,
+      validator: widget.validator,
+      onChanged: (v) {
+        isChanged = controller.text == v;
+        setState(() {});
+      },
     );
   }
 }
-

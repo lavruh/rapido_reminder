@@ -23,7 +23,7 @@ class AlarmEditor extends GetxController {
   }
 
   DateTime get alarmDate => _date;
-
+  String get itemId => _id.toString();
   String get durationStr => duration.value.inMinutes.toString();
 
   openEditor({Alarm? alarm}) {

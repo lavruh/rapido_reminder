@@ -72,6 +72,7 @@ class AlarmsScreen extends StatelessWidget {
             secondChild: const SizedBox(
               key: Key('holder'),
               height: 1,
+              width: 1,
             ),
             duration: const Duration(milliseconds: 100),
           );

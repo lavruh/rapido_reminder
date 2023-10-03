@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:rapido_reminder/domain/states/alarm_editor.dart';
 import 'package:rapido_reminder/utils/input_widget.dart';
 
-const channelKey = 'alarm_channel';
-
 class AlarmEditorWidget extends StatelessWidget {
   const AlarmEditorWidget({Key? key}) : super(key: key);
 
@@ -21,6 +19,7 @@ class AlarmEditorWidget extends StatelessWidget {
               Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: InputWidget(
+                      key: Key(state.itemId),
                       text: state.title.value,
                       lable: 'Title',
                       validator: _titleValidator,
@@ -44,6 +43,7 @@ class AlarmEditorWidget extends StatelessWidget {
                     child: SizedBox(
                         width: 100,
                         child: InputWidget(
+                            key: Key(state.itemId),
                             text: state.durationStr,
                             lable: 'In minutes',
                             validator: _minutesValidator,
