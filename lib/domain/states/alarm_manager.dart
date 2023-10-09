@@ -2,63 +2,70 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:get/get.dart';
 import 'package:rapido_reminder/data/i_store_serv.dart';
 import 'package:rapido_reminder/domain/entities/alarm.dart';
+import 'package:rapido_reminder/utils/bool_ext.dart';
 
 class AlarmsManager extends GetxController {
   final alarms = <Alarm>[].obs;
-  final inactiveAlarms = <Alarm>[].obs;
   final _db = Get.find<IStoreServ>();
 
   getAlarms() async {
     final list = await AwesomeNotifications().listScheduledNotifications();
-    alarms.value = list.map((e) => Alarm.fromNotificationModel(e)).toList();
-    inactiveAlarms.clear();
+    final activeAlarms =
+        list.map<Alarm>((e) => Alarm.fromNotificationModel(e)).toList();
+    alarms.clear();
     await for (final map in _db.readAll()) {
-      inactiveAlarms.add(Alarm.fromMap(map));
+      Alarm a = Alarm.fromMap(map);
+      final isActive =
+          activeAlarms.firstWhereOrNull((element) => element.id == a.id);
+      if (isActive != null) {
+        a = a.copyWith(isActive: true);
+      }
+      alarms.add(a);
     }
+    alarms.sort((a, b) => a.isActive.compareTo(b.isActive));
   }
 
   createAlarm({
     required Alarm alarm,
   }) async {
-    await AwesomeNotifications().cancel(alarm.id);
+    final newAlarm = alarm.copyWith(isActive: true);
+    await AwesomeNotifications().cancel(newAlarm.id);
 
     await AwesomeNotifications().createNotification(
-      content: alarm.toNotificationContent(),
-      schedule: alarm.toNotificationCalendar(),
+      content: newAlarm.toNotificationContent(),
+      schedule: newAlarm.toNotificationCalendar(),
     );
-    alarms.add(alarm);
-    final index = inactiveAlarms.indexWhere((e) => e.id == alarm.id);
-    if (index != -1) {
-      inactiveAlarms.removeAt(index);
-    }
+    updateAlarm(newAlarm);
+
+    _db.create(alarm.toMap());
   }
 
   moveAlarmToInactive(int id) {
     final index = alarms.indexWhere((e) => e.id == id);
     final alarm = alarms.removeAt(index);
-    updateInactiveAlarms(alarm);
-    _db.create(alarm.toMap());
+    alarms.insert(index, alarm.copyWith(isActive: false));
   }
 
-  updateInactiveAlarms(Alarm alarm) {
-    final index = inactiveAlarms.indexWhere((e) => e.id == alarm.id);
+  updateAlarm(Alarm alarm) {
+    final index = alarms.indexWhere((e) => e.id == alarm.id);
     if (index == -1) {
-      inactiveAlarms.add(alarm);
+      alarms.add(alarm);
     } else {
-      inactiveAlarms.removeAt(index);
-      inactiveAlarms.insert(index, alarm);
+      alarms.removeAt(index);
+      alarms.insert(0, alarm);
     }
+    alarms.value = [...alarms];
   }
 
   cancelAlarm(Alarm alarm) async {
     await AwesomeNotifications().cancel(alarm.id);
-    moveAlarmToInactive(alarm.id);
+    updateAlarm(alarm.copyWith(isActive: false));
   }
 
   deleteInactiveAlarm(Alarm alarm) {
-    final index = inactiveAlarms.indexWhere((e) => e.id == alarm.id);
+    final index = alarms.indexWhere((e) => e.id == alarm.id);
     if (index != -1) {
-      inactiveAlarms.removeAt(index);
+      alarms.removeAt(index);
       _db.delete(alarm.id.toString());
     }
   }

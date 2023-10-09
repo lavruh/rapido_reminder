@@ -6,12 +6,14 @@ class Alarm {
   final String title;
   final DateTime date;
   final Duration duration;
+  final bool isActive;
 
   Alarm({
     int? id,
     required this.title,
     required this.date,
     required this.duration,
+    this.isActive = false,
   }) : id = id ?? generateId();
 
   Alarm copyWith({
@@ -19,12 +21,14 @@ class Alarm {
     String? title,
     DateTime? date,
     Duration? duration,
+    bool? isActive,
   }) {
     return Alarm(
       id: id ?? this.id,
       title: title ?? this.title,
       date: date ?? this.date,
       duration: duration ?? this.duration,
+      isActive: isActive ?? this.isActive,
     );
   }
 
@@ -54,7 +58,8 @@ class Alarm {
         id: e.content?.id,
         title: e.content?.title ?? '',
         date: scheduleToDate(e.schedule!),
-        duration: Duration(minutes: e.content?.progress ?? 0));
+        duration: Duration(minutes: e.content?.progress ?? 0),
+        isActive: true);
   }
 
   NotificationContent toNotificationContent() {
@@ -83,4 +88,9 @@ class Alarm {
   }
 
   static int generateId() => DateTime.now().second + DateTime.now().millisecond;
+
+  @override
+  String toString() {
+    return 'Alarm{id: $id, title: $title, date: $date, duration: $duration, isActive: $isActive} \n';
+  }
 }

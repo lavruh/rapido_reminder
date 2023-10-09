@@ -25,47 +25,37 @@ class AlarmsScreen extends StatelessWidget {
           },
           child: GetX<AlarmsManager>(
             builder: (state) {
-              return Column(
-                children: [
-                  Flexible(
-                    child: ListView(
-                      children: state.alarms
-                          .map((e) => AlarmWidget(
-                                item: e,
-                                onTap: () {
-                                  Get.find<AlarmEditor>().openEditor(alarm: e);
-                                },
-                                slideIcon: Icons.cancel,
-                                onSlideTap: () => state.cancelAlarm(e),
-                              ))
-                          .toList(),
-                    ),
-                  ),
-                  Flexible(
-                    child: ListView(
-                      children: state.inactiveAlarms
-                          .map((e) => AlarmWidget(
-                                item: e,
-                                inActive: true,
-                                onTap: () {
-                                  Get.find<AlarmEditor>().openEditor(alarm: e);
-                                },
-                                slideIcon: Icons.delete,
-                                onSlideTap: () => state.deleteInactiveAlarm(e),
-                              ))
-                          .toList(),
-                    ),
-                  )
-                ],
+              return TapRegion(
+                onTapInside: (_) {
+                  Get.find<AlarmEditor>().closeEditorDialog();
+                },
+                child: ListView(
+                  children: state.alarms
+                      .map((e) => AlarmWidget(
+                            item: e,
+                            inActive: !e.isActive,
+                            onTap: () {
+                              Get.find<AlarmEditor>().openEditor(alarm: e);
+                            },
+                            slideIcon: e.isActive ? Icons.cancel : Icons.delete,
+                            onSlideTap: () {
+                              if (e.isActive) {
+                                state.cancelAlarm(e);
+                              } else {
+                                state.deleteInactiveAlarm(e);
+                              }
+                            },
+                          ))
+                      .toList(),
+                ),
               );
             },
           ),
         ),
         bottomSheet: GetX<AlarmEditor>(builder: (s) {
           return AnimatedCrossFade(
-            crossFadeState: s.isOpen.value
-                ? CrossFadeState.showFirst
-                : CrossFadeState.showSecond,
+            crossFadeState:
+                s.isOpen ? CrossFadeState.showFirst : CrossFadeState.showSecond,
             firstChild: const AlarmEditorWidget(
               key: Key('editor'),
             ),
@@ -78,7 +68,7 @@ class AlarmsScreen extends StatelessWidget {
           );
         }),
         floatingActionButton: GetX<AlarmEditor>(builder: (s) {
-          return s.isOpen.value
+          return s.isOpen
               ? FloatingActionButton(
                   onPressed: () => s.submit(),
                   child: const Icon(Icons.alarm_on))

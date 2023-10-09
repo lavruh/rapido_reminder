@@ -12,7 +12,11 @@ class AlarmEditor extends GetxController {
   final dateStr = DateFormat('y-MM-dd').format(DateTime.now()).obs;
   final timeStr = DateFormat('HH:mm').format(DateTime.now()).obs;
   final duration = const Duration(minutes: 0).obs;
-  final isOpen = false.obs;
+  final _isEditorOpen = false.obs;
+
+  bool get isOpen => _isEditorOpen.value;
+  openEditorDialog() => _isEditorOpen.value = true;
+  closeEditorDialog() => _isEditorOpen.value = false;
 
   set alarmDate(DateTime val) {
     _date = val;
@@ -36,7 +40,7 @@ class AlarmEditor extends GetxController {
       title.value = '';
       setDuration(1);
     }
-    isOpen.value = true;
+    openEditorDialog();
   }
 
   pickupDateTime({DateTime? date, TimeOfDay? rawTimeVal}) async {
@@ -68,6 +72,6 @@ class AlarmEditor extends GetxController {
     final alarm =
         Alarm(id: _id, title: title.value, date: _date, duration: duration.value);
     Get.find<AlarmsManager>().createAlarm(alarm: alarm);
-    isOpen.value = false;
+    closeEditorDialog();
   }
 }

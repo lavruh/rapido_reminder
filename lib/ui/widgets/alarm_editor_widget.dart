@@ -43,7 +43,7 @@ class AlarmEditorWidget extends StatelessWidget {
                     child: SizedBox(
                         width: 100,
                         child: InputWidget(
-                            key: Key(state.itemId),
+                            key: Key("${state.itemId}_${state.duration}"),
                             text: state.durationStr,
                             lable: 'In minutes',
                             validator: _minutesValidator,
