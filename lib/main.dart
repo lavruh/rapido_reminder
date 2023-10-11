@@ -10,8 +10,6 @@ import 'package:rapido_reminder/ui/screens/alarms_screen.dart';
 
 const channelKey = 'alarm_channel';
 
-Future<void> actionReceived(ReceivedAction a) async {}
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -28,6 +26,7 @@ void main() {
       ledOffMs: 100,
       enableVibration: true,
       importance: NotificationImportance.High,
+      channelShowBadge: false,
     )
   ]);
   Get.put<IStoreServ>(SharedPrefStoreServ());
@@ -43,19 +42,34 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AwesomeNotifications().resetGlobalBadge();
     AwesomeNotifications().setListeners(
-        onActionReceivedMethod: actionReceived,
-        onNotificationDisplayedMethod: (a) async {
-          Get.find<AudioPlayer>()
-              .play(AssetSource('sounds/digital-alarm-buzzer.wav'));
-        },
-        onDismissActionReceivedMethod: (a) async {
-          Get.find<AudioPlayer>().stop();
-          final id = a.id;
-          if (id != null) {
-            Get.find<AlarmsManager>().moveAlarmToInactive(id);
-          }
-        });
+      onActionReceivedMethod: (a) async {
+        Get.find<AudioPlayer>().stop();
+        final id = a.id;
+        final postponeMinutes = int.tryParse(a.buttonKeyPressed);
+        if (id != null && postponeMinutes != null) {
+          Get.find<AlarmsManager>().postponeAlarm(
+            id: id,
+            postponeMinutes: postponeMinutes,
+          );
+        }
+      },
+      onNotificationDisplayedMethod: (a) async {
+        AwesomeNotifications().incrementGlobalBadgeCounter();
+        Get.find<AudioPlayer>()
+            .play(AssetSource('sounds/digital-alarm-buzzer.wav'));
+      },
+      onDismissActionReceivedMethod: (a) async {
+        AwesomeNotifications().decrementGlobalBadgeCounter();
+        Get.find<AudioPlayer>().stop();
+        final id = a.id;
+        if (id != null) {
+          Get.find<AlarmsManager>().moveAlarmToInactive(id);
+        }
+      },
+    );
+
     return GetMaterialApp(
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const AlarmsScreen(),

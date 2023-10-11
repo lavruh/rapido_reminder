@@ -30,10 +30,13 @@ class AlarmsManager extends GetxController {
   }) async {
     final newAlarm = alarm.copyWith(isActive: true);
     await AwesomeNotifications().cancel(newAlarm.id);
-
     await AwesomeNotifications().createNotification(
       content: newAlarm.toNotificationContent(),
       schedule: newAlarm.toNotificationCalendar(),
+      actionButtons: [
+        NotificationActionButton(key: "5", label: 'Postpone 5min'),
+        NotificationActionButton(key: "30", label: 'Postpone 30min'),
+      ],
     );
     updateAlarm(newAlarm);
 
@@ -68,5 +71,21 @@ class AlarmsManager extends GetxController {
       alarms.removeAt(index);
       _db.delete(alarm.id.toString());
     }
+  }
+
+  postponeAlarm({
+    required int id,
+    required int postponeMinutes,
+  }) {
+    final alarm = alarms.firstWhereOrNull((e) => e.id == id);
+    if (alarm == null) {
+      Get.snackbar('Error', "Alarm not found");
+      return;
+    }
+    final now = DateTime.now();
+    final d = Duration(minutes: postponeMinutes);
+    final newDate = DateTime.fromMillisecondsSinceEpoch(
+        now.millisecondsSinceEpoch + d.inMilliseconds);
+    createAlarm(alarm: alarm.copyWith(date: newDate));
   }
 }
